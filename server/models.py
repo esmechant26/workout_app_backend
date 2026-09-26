@@ -11,27 +11,40 @@ class Exercise(db.Model):
     category = db.Column(db.String)
     equipment_needed = db.Column(db.Boolean)
 
+    # Exercise has many WorkoutExercises (one to many)
+    workout_exercises = db.relationship("WorkoutExercise", back_populates="exercise")
+
+    # Exercise has many Workouts through WorkoutExercises
+    workouts = db.relationship("Workout", secondary="workout_exercises", viewonly=True)
+
 class Workout(db.Model):
     __tablename__ = 'workout'
 
-    id = db.Column(db.integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     # date the workout was created
     date = db.Column(db.DateTime, server_default=db.func.now())
-    duration_minutes = db.Column(db.integer)
+    duration_minutes = db.Column(db.Integer)
     notes = db.Column(db.String)
 
-class WorkoutExercises(db.Model):
+    # Workout has many WorkoutExercises (one to many)
+    workout_exercises = db.relationship("WorkoutExercise", back_populates="workout")
+
+    # workout has many Exercises through WorkoutExercises (many to many)
+    exercises = db.relationship("Exercise", secondary="workout_exercises", viewonly=True)
+
+class WorkoutExercise(db.Model):
     __tablename__ = 'workout_exercises'
 
     id = db.Column(db.Integer, primary_key=True)
-    workout_id = db.Column(db.Integer, db.ForeignKey("workouts.id"), nullable=False)
+    workout_id = db.Column(db.Integer, db.ForeignKey("workout.id"), nullable=False)
+    exercise_id = db.Column(db.Integer, db.ForeignKey("exercise.id"), nullable=False)
 
     reps = db.Column(db.Integer)
     sets = db.Column(db.Integer)
     duration_seconds = db.Column(db.Integer)
 
-    # WorkoutExercises belongs to a Workout
+    # WorkoutExercise belongs to a Workout (many to one)
     workout = db.relationship("Workout", back_populates="workout_exercises")
 
-    # WorkoutExercises belongs to an Exercise
+    # WorkoutExercises belongs to an Exercise (many to one)
     exercise = db.relationship("Exercise", back_populates="workout_exercises")
