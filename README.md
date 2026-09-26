@@ -11,45 +11,14 @@ Clone the repository and navigate into the project directory.
 
 Install the project dependencies:
 
-```bash
 pipenv install
-```
-
-Enter the virtual environment:
-
-```bash
-pipenv shell
-```
-
-Navigate into the server directory:
-
-```bash
 cd server
-```
-
-Initialize the database migrations if they have not already been initialized:
-
-```bash
-flask db init
-```
-
-Create a migration:
-
-```bash
-flask db migrate -m "Initial migration"
-```
-
-Apply the migration:
-
-```bash
 flask db upgrade
-```
+python seed.py
+flask run --port 5555
 
 Seed the database:
-
-```bash
 python seed.py
-```
 
 The seed file clears the existing database records and creates sample workouts, exercises, and workout-exercise relationships.
 
