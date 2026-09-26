@@ -33,6 +33,7 @@ def create_workout():
 
     db.session.add(new_workout)
     db.session.commit()
+    # 201 indicates the request succeded and created a new source
     return make_response(workout_schema.dump(new_workout), 201)
 
 # delete a workout
@@ -64,12 +65,28 @@ def get_exercise(id):
 # create an exercise
 @app.route("/exercises", methods=["POST"])
 def create_exercise():
-    pass
+    data = exercises_schema.load(request.get_json())
+
+    new_exercise = Exercise(
+        name = data["name"],
+        category = data.get("category"),
+        equipment_needed = data.get("equipment_needed")
+    )
+
+    db.session.add(new_exercise)
+    db.session.commit()
+    return make_response(exercises_schema.dump(new_exercise),201)
 
 # delete an exercise
 @app.route("/exercises/<int:id>", methods=["DELETE"])
 def delete_exercise(id):
-    pass
+    exercise = Exercise.query.get(id)
+    if not exercise:
+        return make_response( {"error": "Exercise not found"})
+
+    db.session.delete(exercise)
+    db.session.commit()
+    return make_response({"message": "Exercise deleted"}, 200)
 
 # add an exercise to a workout
 @app.route("/workouts/<int:workout_id>/exercises/<int:exercise_id>/workout_exercises", methods=["POST"])
