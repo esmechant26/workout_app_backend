@@ -17,12 +17,13 @@ def get_workouts():
     workouts = Workout.query.all()
 
     return make_response(workouts_schema.dump(workouts))
-    
 
 # list one workout
 @app.route("/workouts/<int:id>", methods=["GET"])
 def get_workout(id):
-    pass
+    workout = Workout.query.get(id)
+
+    return make_response(workouts_schema.dump(workout), 200)
 
 # create workout
 @app.route("/workouts", methods=["POST"])
