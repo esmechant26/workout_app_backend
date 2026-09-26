@@ -14,7 +14,10 @@ db.init_app(app)
 # list all workouts
 @app.route("/workouts", methods=["GET"])
 def get_workouts():
-    pass
+    workouts = Workout.query.all()
+
+    return make_response(workouts_schema.dump(workouts))
+    
 
 # list one workout
 @app.route("/workouts/<int:id>", methods=["GET"])
