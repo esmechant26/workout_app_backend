@@ -21,14 +21,19 @@ def get_workouts():
 # list one workout
 @app.route("/workouts/<int:id>", methods=["GET"])
 def get_workout(id):
-    workout = Workout.query.get(id)
+    workout = db.session.get(Workout, id)
 
     return make_response(workouts_schema.dump(workout), 200)
 
 # create workout
 @app.route("/workouts", methods=["POST"])
 def create_workout():
-    pass
+    data = workout_schema.load(request.get_json())
+    new_workout = Workout(duration_minutes=data["duration_minutes"], notes=data.get("notes"))
+
+    db.session.add(new_workout)
+    db.session.commit()
+    return make_response(workout_schema.dump(new_workout), 201)
 
 # delete a workout
 @app.route("/workouts/<int:id>", methods=["DELETE"])
