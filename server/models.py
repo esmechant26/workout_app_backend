@@ -90,11 +90,12 @@ class WorkoutSchema(Schema):
     # duration must exist (equal to or longer than 1 min)
     duration_minutes = fields.Int(required=True, validate=validate.Range(min=1))
     notes = fields.Str()
+    exercises = fields.Nested(ExerciseSchema, many=True, dump_only=True)
 
 class WorkoutExerciseSchema(Schema):
     id = fields.Int(dump_only=True)
-    workout_id = fields.Int(required=True)
-    exercise_id = fields.Int(required=True)
+    workout_id = fields.Int(dump_only=True)
+    exercise_id = fields.Int(dump_only=True)
     # reps, sets, and duration may or may not exist. if they do, they must be equal to or more than 1
     reps = fields.Int(allow_none=True, validate=validate.Range(min=1))
     sets = fields.Int(allow_none=True, validate=validate.Range(min=1))

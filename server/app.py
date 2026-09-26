@@ -1,5 +1,6 @@
 from flask import Flask, make_response, request
 from flask_migrate import Migrate
+from marshmallow import ValidationError
 
 from models import *
 
@@ -30,7 +31,11 @@ def get_workout(id):
 # create workout
 @app.route("/workouts", methods=["POST"])
 def create_workout():
-    data = workout_schema.load(request.get_json())
+    try:
+        data = workout_schema.load(request.get_json())
+    except ValidationError as err:
+        return make_response({"errors": err.messages}, 400)
+
     new_workout = Workout(duration_minutes=data["duration_minutes"], notes=data.get("notes"))
 
     db.session.add(new_workout)
@@ -67,7 +72,10 @@ def get_exercise(id):
 # create an exercise
 @app.route("/exercises", methods=["POST"])
 def create_exercise():
-    data = exercise_schema.load(request.get_json())
+    try:
+        data = exercise_schema.load(request.get_json())
+    except ValidationError as err:
+        return make_response({"errors": err.messages}, 400)
 
     new_exercise = Exercise(
         name = data["name"],
