@@ -7,7 +7,7 @@ class Exercise(db.Model):
     __tablename__ = 'exercise'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
+    name = db.Column(db.String, unique=True, nullable=False)
     category = db.Column(db.String)
     equipment_needed = db.Column(db.Boolean)
 
@@ -23,7 +23,7 @@ class Workout(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     # date the workout was created
     date = db.Column(db.DateTime, server_default=db.func.now())
-    duration_minutes = db.Column(db.Integer)
+    duration_minutes = db.Column(db.Integer, nullable=False)
     notes = db.Column(db.String)
 
     # Workout has many WorkoutExercises (one to many)
@@ -31,6 +31,13 @@ class Workout(db.Model):
 
     # workout has many Exercises through WorkoutExercises (many to many)
     exercises = db.relationship("Exercise", secondary="workout_exercises", viewonly=True)
+
+    # validation ensuring duration_minutes is greater than 0
+    @validates("duration_minutes")
+    def validate_duration_minutes(self, key, duration_minutes):
+        if duration_minutes is not None and duration_minutes <=0:
+            raise ValueError("Duration must be greater than 0.")
+        return duration_minutes
 
 class WorkoutExercise(db.Model):
     __tablename__ = 'workout_exercises'
@@ -48,3 +55,22 @@ class WorkoutExercise(db.Model):
 
     # WorkoutExercises belongs to an Exercise (many to one)
     exercise = db.relationship("Exercise", back_populates="workout_exercises")
+
+    # validations ensuring that the values of reps, sets, and duration_seconds are greater than 0
+    @validates("reps")
+    def validate_reps(self, key, reps):
+        if reps is not None and reps <= 0:
+            raise ValueError("Reps must be greater than 0.")
+        return reps
+
+    @validates("sets")
+    def validate_sets(self, key, sets):
+        if sets is not None and sets <=0:
+            raise ValueError("Sets must be greater than 0.")
+        return sets
+
+    @validates("duration_seconds")
+    def validate_duration_seconds(self, key, duration_seconds):
+        if duration_seconds is not None and duration_seconds <=0:
+            raise ValueError("Duration must be greater than 0.")
+        return duration_seconds
