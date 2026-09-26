@@ -55,7 +55,11 @@ def get_exercises():
 # list one exercise 
 @app.route("/exercises/<int:id>", methods=["GET"])
 def get_exercise(id):
-    pass
+    exercise = Exercise.query.get(id)
+    if not exercise:
+        return make_response({"error": "Exercise not found"}, 404)
+    
+    return make_response(exercises_schema.dump(exercise), 200)
 
 # create an exercise
 @app.route("/exercises", methods=["POST"])
