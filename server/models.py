@@ -76,24 +76,36 @@ class WorkoutExercise(db.Model):
             raise ValueError("Duration must be greater than 0.")
         return duration_seconds
 
-# Marshmallow Schemas for each model
+# Marshmallow Schemas for each model, mirror table constraints/validations
 class ExerciseSchema(Schema):
     id = fields.Int(dump_only=True)
-    name = fields.Str(required=True)
+    # name must exist (equal to or longer than 1 character)
+    name = fields.Str(required=True, validate=validate.Length(min=1))
     category = fields.Str()
     equipment_needed = fields.Bool()
 
 class WorkoutSchema(Schema):
     id = fields.Int(dump_only=True)
     date = fields.DateTime(dump_only=True)
-    duration_minutes = fields.Int(required=True)
+    # duration must exist (equal to or longer than 1 min)
+    duration_minutes = fields.Int(required=True, validate=validate.Range(min=1))
     notes = fields.Str()
 
-class WorkoutExercisesSchema(Schema):
+class WorkoutExerciseSchema(Schema):
     id = fields.Int(dump_only=True)
     workout_id = fields.Int(required=True)
     exercise_id = fields.Int(required=True)
-    reps = fields.Int(allow_none=True)
-    sets = fields.Int(allow_none=True)
-    duration_seconds = fields.Int(allow_none=True)
+    # reps, sets, and duration may or may not exist. if they do, they must be equal to or more than 1
+    reps = fields.Int(allow_none=True, validate=validate.Range(min=1))
+    sets = fields.Int(allow_none=True, validate=validate.Range(min=1))
+    duration_seconds = fields.Int(allow_none=True, validate=validate.Range(min=1))
 
+# serialization / deserialization
+exercise_schema = ExerciseSchema()
+exercises_schema = ExerciseSchema(many=True)
+
+workout_schema = WorkoutSchema()
+workouts_schema = WorkoutSchema(many=True)
+
+workout_exercise_schema = WorkoutExerciseSchema()
+workout_exercises_schema = WorkoutExerciseSchema(many=True)
