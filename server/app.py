@@ -1,4 +1,4 @@
-from flask import Flask, make_response
+from flask import Flask, make_response, request
 from flask_migrate import Migrate
 
 from models import *
@@ -22,8 +22,10 @@ def get_workouts():
 @app.route("/workouts/<int:id>", methods=["GET"])
 def get_workout(id):
     workout = db.session.get(Workout, id)
+    if not workout:
+        return make_response({"error": "Workout not found"}, 404)
 
-    return make_response(workouts_schema.dump(workout), 200)
+    return make_response(workout_schema.dump(workout), 200)
 
 # create workout
 @app.route("/workouts", methods=["POST"])
@@ -41,7 +43,7 @@ def create_workout():
 def delete_workout(id):
     workout = Workout.query.get(id)
     if not workout:
-        return make_response( {"error": "Workout not found"})
+        return make_response( {"error": "Workout not found"}, 404)
 
     db.session.delete(workout)
     db.session.commit()
@@ -60,12 +62,12 @@ def get_exercise(id):
     if not exercise:
         return make_response({"error": "Exercise not found"}, 404)
     
-    return make_response(exercises_schema.dump(exercise), 200)
+    return make_response(exercise_schema.dump(exercise), 200)
 
 # create an exercise
 @app.route("/exercises", methods=["POST"])
 def create_exercise():
-    data = exercises_schema.load(request.get_json())
+    data = exercise_schema.load(request.get_json())
 
     new_exercise = Exercise(
         name = data["name"],
@@ -75,14 +77,14 @@ def create_exercise():
 
     db.session.add(new_exercise)
     db.session.commit()
-    return make_response(exercises_schema.dump(new_exercise),201)
+    return make_response(exercise_schema.dump(new_exercise),201)
 
 # delete an exercise
 @app.route("/exercises/<int:id>", methods=["DELETE"])
 def delete_exercise(id):
     exercise = Exercise.query.get(id)
     if not exercise:
-        return make_response( {"error": "Exercise not found"})
+        return make_response( {"error": "Exercise not found"}, 404)
 
     db.session.delete(exercise)
     db.session.commit()
@@ -91,7 +93,29 @@ def delete_exercise(id):
 # add an exercise to a workout
 @app.route("/workouts/<int:workout_id>/exercises/<int:exercise_id>/workout_exercises", methods=["POST"])
 def add_exercise_to_workout(workout_id, exercise_id):
-    pass
+    workout = Workout.query.get(workout_id)
+    exercise = Exercise.query.get(exercise_id)
+
+    if not workout:
+        return make_response({"error": "Workout not found"}, 404)
+
+    if not exercise:
+        return make_response({"error": "Exercise not found"}, 404)
+
+    data = workout_exercise_schema.load(request.get_json())
+
+    new_workout_exercise = WorkoutExercise(
+        workout_id = workout_id,
+        exercise_id = exercise_id,
+        reps = data.get("reps"),
+        sets = data.get("sets"),
+        duration_seconds = data.get("duration_seconds")
+    )
+
+    db.session.add(new_workout_exercise)
+    db.session.commit()
+
+    return make_response(workout_exercise_schema.dump(new_workout_exercise), 201)
 
 
 if __name__ == '__main__':
