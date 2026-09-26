@@ -29,3 +29,9 @@ class WorkoutExercises(db.Model):
     reps = db.Column(db.Integer)
     sets = db.Column(db.Integer)
     duration_seconds = db.Column(db.Integer)
+
+    # WorkoutExercises belongs to a Workout
+    workout = db.relationship("Workout", back_populates="workout_exercises")
+
+    # WorkoutExercises belongs to an Exercise
+    exercise = db.relationship("Exercise", back_populates="workout_exercises")
